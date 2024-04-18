@@ -60,7 +60,6 @@ class _CityScreenState extends State<CityScreen> {
                       
                         return AlertDialog(
                           
-                          actionsAlignment: MainAxisAlignment.center,
                           title: const Text("The city field is empty",
                           style: TextStyle(
                             color: Colors.deepPurple

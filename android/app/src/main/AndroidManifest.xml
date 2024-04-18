@@ -2,6 +2,7 @@
     package="com.example.weather_app">
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+
     <!-- Required to fetch data from the internet. -->
     <uses-permission android:name="android.permission.INTERNET" />
 

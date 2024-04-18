@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:weather_app/screens/city_screen.dart';
 import 'package:weather_app/services/weather.dart';
 import 'package:weather_app/utilities/constants.dart';
 
 class LocationScreen extends StatefulWidget {
-  const LocationScreen( this.locationWeather, {super.key});
+  const LocationScreen(this.locationWeather, {super.key});
 
-  final  locationWeather;
+  final locationWeather;
 
   @override
   State<LocationScreen> createState() => _LocationScreenState();
@@ -19,7 +20,6 @@ class _LocationScreenState extends State<LocationScreen> {
   int? temperature;
 
   WeatherModel weather = WeatherModel();
-
 
   @override
   void initState() {
@@ -53,13 +53,11 @@ class _LocationScreenState extends State<LocationScreen> {
           body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-              image: const AssetImage(
-                "assets/images/bckgrndImg.jpeg"),
+              image: const AssetImage("assets/images/bckgrndImg.jpeg"),
               fit: BoxFit.fill,
               colorFilter: ColorFilter.mode(
                   Colors.white.withOpacity(0.8), BlendMode.dstATop)),
         ),
-
         constraints: const BoxConstraints.expand(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -70,8 +68,54 @@ class _LocationScreenState extends State<LocationScreen> {
               children: [
                 IconButton(
                     onPressed: () async {
-                      var weatherData = await weather.getWeatherLocation();
-                      updateUI(weatherData);
+
+                      if ( await Permission.location.serviceStatus.isEnabled){
+PermissionStatus permissionStatus =
+                          await Permission.location.status;
+                      if (permissionStatus == PermissionStatus.granted) {
+                        var weatherData = await weather.getWeatherLocation();
+                        updateUI(weatherData);
+                      }
+                      if (permissionStatus == PermissionStatus.denied){
+                        if(!context.mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          backgroundColor: Colors.white,
+                          content: Column(
+                          children: [
+                            Text("The location permission must be granted",
+                            style: TextStyle(
+                              color: Colors.deepPurple
+                            ),
+                            ),
+
+                            Text("The Weather cannot be load",
+                            style: TextStyle(
+                              color: Colors.deepPurple
+                            ),
+                            ),
+
+                          ],
+                        )));
+                        Map<Permission, PermissionStatus> permissionStatus = await [Permission.location].request();
+                        var weatherData = await weather.getWeatherLocation();
+
+                        updateUI(weatherData);
+                      }
+                      if (permissionStatus == PermissionStatus.permanentlyDenied){
+                        openAppSettings();
+                        Map<Permission, PermissionStatus> permissionStatus = await [Permission.location].request();
+
+                        var weatherData = await weather.getWeatherLocation();
+
+                        updateUI(weatherData);
+
+                      }
+                      }
+                      else{
+                        if(!context.mounted)return;
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Enable location")));
+                      }
+                      
                     },
                     icon: const Icon(
                       Icons.near_me,
